@@ -34,31 +34,13 @@ const districtPositions = [
   { name: "Jaffna", position: [9.675689491608374, 80.03613210882942] },
 ];
 
-const WeatherMap = () => {
-  const [weatherData, setWeatherData] = useState([]);
-
-  useEffect(() => {
-    const fetchWeatherData = async () => {
-      try {
-        const response = await axios.get("https://weatherapi-h0nu.onrender.com/weather/data");
-        console.log(response.data);
-        setWeatherData(response.data);
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
-      }
-    };
-
-    fetchWeatherData();
-    const interval = setInterval(fetchWeatherData, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
+const WeatherMap = ({weatherData}) => {
   return (
     <section>
       <MapContainer
         center={center}
         zoom={8}
-        style={{ width: "50vw", height: "90vh" }}
+        style={{ width: "30vw", height: "80vh" }}
         dragging={true}
         scrollWheelZoom={true}
         zoomControl={true}

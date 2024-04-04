@@ -1,62 +1,73 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card } from './components'
-
-//import axios from "axios";
-import Search from './components/search';
 import WeatherMap from './components/map2';
-import { WEATHER_API_KEY, WEATHER_API_URL } from './api';
+import axios from 'axios';
 
 const App = () => {
 
-  const [currentWeather, setCurrentWeather] = useState(null);
-  
+  const [weatherData, setWeatherData] = useState([]);
+  const [searchData, setSearchData] = useState(null);
 
-  const handleOnSearchChange= (searchData) => {
-    const [lat, lon] = searchData.value.split(" ");
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      try {
+        const response = await axios.get("https://weatherapi-h0nu.onrender.com/weather/data");
+        console.log(response.data);
+        setWeatherData(response.data);
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+      }
+    };
 
-    const currentWeatherFetch = fetch(
-      `${WEATHER_API_URL}/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
-    );
+    fetchWeatherData();
+    const interval = setInterval(fetchWeatherData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-    
-
-    Promise.all([currentWeatherFetch ])
-      .then(async (response) => {
-        const weatherResponse = await response[0].json();
-       
-
-        setCurrentWeather({ city: searchData.label, ...weatherResponse });
-        
-      })
-      .catch(console.log);
+  const handleOnSearchChange = async (e) => {
+    const searchCityData = e.target.value;
+    const searchedData =  weatherData.find(district => district.district.toLowerCase() === searchCityData.toLowerCase());
+    setSearchData(searchedData);
   }
 
   return (
     <div>
-    <div className='absolute inset-0 bg-white flex items-center justify-center p-4 '>
+      <div className="absolute inset-0 bg-white flex items-center justify-center p-4 ">
+        <video
+          src="https://lofico.nyc3.cdn.digitaloceanspaces.com/scenes/am_i_dreaming/underwater.mp4
+          "
+          autoPlay
+          loop
+          muted
+          className="absolute inset-0 w-full h-full object-cover -z-0"
+        />
 
-      <video src='https://lofico.nyc3.digitaloceanspaces.com/scenes/cafe/outside-rain.mp4' 
-      autoPlay loop muted className='absolute inset-0 w-full h-full object-cover -z-0'/>
-      
-      
-     
-      <div className=" w-full md:w-375 p-4  bg-lightOverlay shadow-2xl rounded-xl backdrop-blur-md flex-col items-center justify-center"> 
-      <Search onSearchChange={handleOnSearchChange}/>
-      
-      
-      {currentWeather && <Card data ={currentWeather}/>}
+        <div className=" w-full md:w-375 p-4  bg-lightOverlay shadow-2xl rounded-xl backdrop-blur-md flex-col items-center justify-center">
 
-    
+          <div className='max-w-md mx-auto mb-3 bg-darkOverlay rounded-md pb-5 '>
+            <p className="text-2xl font-bold bg-gradient-to-r from-teal-200 to-teal-500 bg-clip-text text-transparent text-center">Weather App</p>
+          </div>
+          <div>
+            <div className="flex items-center max-w-md mx-auto bg-white rounded-md">
+              <input
+                type="search"
+                className="w-full px-4 py-2 text-gray-800 rounded-full focus:outline-none"
+                placeholder="search"
+                value={searchData && searchData.district}
+                onChange={handleOnSearchChange}
+              />
+            </div>
+          </div>
+
+          {searchData && <Card searchData={searchData} />}
+        </div>
+
+        <div className='p-9 mx-4 bg-lightOverlay shadow-2xl rounded-xl backdrop-blur-md '>
+        <WeatherMap weatherData={weatherData} />
+        </div>
       </div>
-      
-      <WeatherMap />
     </div>
-    </div>
-  )
+  );
 }
 
 export default App
-
-export const heart = <svg xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24" stroke-width="0" stroke="currentColor" class="w-5 h-5">
-<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-</svg>

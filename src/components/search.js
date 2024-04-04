@@ -2,44 +2,34 @@ import React, { useState } from 'react'
 import { AsyncPaginate } from "react-select-async-paginate";
 import { geoApiOptions, GEO_API_URL } from "../api";
 
-const Search = ({onSearchChange}) => {
+const Search = ({ weatherData  }) => {
 
 
     const [cityName, setCityName] = useState(null);
+    const [searchData, setSearchData] = useState(null);
 
-    const loadOptions = async (inputValue) => {
-        const response = await fetch(
-            `${GEO_API_URL}/cities?minPopulation=10000&namePrefix=${inputValue}`,
-            geoApiOptions
-        );
-        const response_1 = await response.json();
-        return {
-            options: response_1.data.map((city) => {
-                return {
-                    value: `${city.latitude} ${city.longitude}`,
-                    label: `${city.name}, ${city.countryCode}`,
-                };
-            }),
-        };
-      };
 
-    const handleOnChange = (searchData) => {
-        setCityName(searchData);
-        onSearchChange(searchData);
-      };
+    const handleOnSearchChange = async (searchData) => {
+        const searchedData =  weatherData.find(district => district.district.toLowerCase() === searchData.toLowerCase());
+        setSearchData(searchedData);
+      }
+ 
+
+      console.log("search data",searchData);
+
 
 
   return (
     <div >
-        <AsyncPaginate
-        placeholder="Search for city"
-        debounceTimeout={1000}
-        value={cityName}
-        onChange={handleOnChange}
-        loadOptions={loadOptions}
-        className='w-full p-3 rounded-md text-base font-semibold text-textColor outline-yellow-400 shadow-sm border-gray-300  '
-        />
-
+         <div className="flex items-center max-w-md mx-auto bg-white rounded-md">
+                <input
+                    type="search"
+                    className="w-full px-4 py-1 text-gray-800 rounded-full focus:outline-none"
+                    placeholder="search"
+                    value={searchData}
+                    onChange={handleOnSearchChange}
+                />
+        </div>
 
     </div>
   )
